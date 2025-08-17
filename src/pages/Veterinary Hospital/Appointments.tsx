@@ -25,26 +25,39 @@ const Appointments = () => {
   const [completionFormData, setCompletionFormData] =
     useState<AppointmentFormData>({});
 
-  useEffect(() => {
-    fetchTodaysAppointments();
-  }, []);
-
-  const fetchTodaysAppointments = async () => {
+  const fetchTodaysAppointments = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) {
+        setLoading(true);
+      }
       const bookings = await vetBookingsApi.getUpcomingBookings();
       setAppointments(bookings);
     } catch (error) {
       console.error("Failed to fetch appointments:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load appointments. Please try again.",
-        variant: "destructive",
-      });
+      if (showLoading) {
+        toast({
+          title: "Error",
+          description: "Failed to load appointments. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
   };
+
+  // Simple auto-refresh every 30 seconds
+  useEffect(() => {
+    fetchTodaysAppointments(true); // Show loading on initial load
+
+    const interval = setInterval(() => {
+      fetchTodaysAppointments(false); // Silent refresh
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleStatusUpdate = async (appointmentId: string, status: string) => {
     try {
@@ -54,7 +67,7 @@ const Appointments = () => {
         description: `Appointment ${status} successfully.`,
       });
       // Refresh appointments
-      await fetchTodaysAppointments();
+      await fetchTodaysAppointments(true);
     } catch (error) {
       console.error("Failed to update appointment status:", error);
       toast({
@@ -80,7 +93,7 @@ const Appointments = () => {
       setSelectedAppointment(null);
       setCompletionFormData({});
       // Refresh appointments
-      await fetchTodaysAppointments();
+      await fetchTodaysAppointments(true);
     } catch (error) {
       console.error("Failed to complete appointment:", error);
       toast({
@@ -117,6 +130,11 @@ const Appointments = () => {
       });
     }
   };
+
+  // Initialize appointments and auto-refresh on component mount
+  useEffect(() => {
+    fetchTodaysAppointments();
+  }, []);
 
   return (
     <div className="space-y-4 md:space-y-6">
