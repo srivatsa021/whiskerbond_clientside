@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { VetHospitalPage } from "./Veterinary Hospital";
-import TrainerDashboard from "./dashboard/TrainerDashboard";
+import PetTrainerDashboard from "./Pet Trainer";
 import BoardingDashboard from "./dashboard/BoardingDashboard";
 import WalkerDashboard from "./dashboard/WalkerDashboard";
 import NGODashboard from "./dashboard/NGODashboard";
@@ -30,7 +30,7 @@ const Dashboard = () => {
     case "vet":
       return <VetHospitalPage />;
     case "trainer":
-      return <TrainerDashboard />;
+      return <PetTrainerDashboard />;
     case "boarding":
       return <BoardingDashboard />;
     case "walker":
