@@ -18,19 +18,21 @@ const Finances = () => {
   const [endDate, setEndDate] = useState("");
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Finance Overview</h2>
+    <div className="space-y-4 md:space-y-6">
+      <h2 className="text-xl md:text-2xl font-bold">Finance Overview</h2>
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
+            <DollarSign className="h-4 w-4 md:h-5 md:w-5" />
             Monthly Summary
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="monthFilter">View by Month</Label>
+            <Label htmlFor="monthFilter" className="text-sm md:text-base">
+              View by Month
+            </Label>
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a month" />
@@ -47,9 +49,11 @@ const Finances = () => {
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="startDate">Start Date</Label>
+              <Label htmlFor="startDate" className="text-sm md:text-base">
+                Start Date
+              </Label>
               <Input
                 id="startDate"
                 type="date"
@@ -58,7 +62,9 @@ const Finances = () => {
               />
             </div>
             <div>
-              <Label htmlFor="endDate">End Date</Label>
+              <Label htmlFor="endDate" className="text-sm md:text-base">
+                End Date
+              </Label>
               <Input
                 id="endDate"
                 type="date"
@@ -70,25 +76,37 @@ const Finances = () => {
           <Button className="w-full">Apply Filters</Button>
 
           <div className="space-y-2 pt-4 border-t mt-4">
-            <div className="flex items-center justify-between">
-              <span>Total Revenue:</span>
-              <span className="font-semibold">₹85,000</span>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1 md:gap-0">
+              <span className="text-sm md:text-base">Total Revenue:</span>
+              <span className="font-semibold text-sm md:text-base">
+                ₹85,000
+              </span>
             </div>
-            <div className="flex items-center justify-between">
-              <span>Outstanding Payments:</span>
-              <span className="font-semibold">₹12,500</span>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1 md:gap-0">
+              <span className="text-sm md:text-base">
+                Outstanding Payments:
+              </span>
+              <span className="font-semibold text-sm md:text-base">
+                ₹12,500
+              </span>
             </div>
-            <div className="flex items-center justify-between">
-              <span>Last Payout:</span>
-              <span className="font-semibold">3 days ago</span>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1 md:gap-0">
+              <span className="text-sm md:text-base">Last Payout:</span>
+              <span className="font-semibold text-sm md:text-base">
+                3 days ago
+              </span>
             </div>
-            <div className="flex items-center justify-between">
-              <span>Consultations Completed:</span>
-              <span className="font-semibold">42</span>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1 md:gap-0">
+              <span className="text-sm md:text-base">
+                Consultations Completed:
+              </span>
+              <span className="font-semibold text-sm md:text-base">42</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span>Upcoming Billing:</span>
-              <span className="font-semibold">₹8,300 (Next Week)</span>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1 md:gap-0">
+              <span className="text-sm md:text-base">Upcoming Billing:</span>
+              <span className="font-semibold text-sm md:text-base">
+                ₹8,300 (Next Week)
+              </span>
             </div>
           </div>
           <Button className="mt-4 w-full" variant="secondary">

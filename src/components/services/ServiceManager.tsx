@@ -196,27 +196,29 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center md:space-y-0">
         <h3 className="text-lg font-semibold">Service Management</h3>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={resetForm}>
+            <Button onClick={resetForm} className="w-full md:w-auto" size="sm">
               <Plus className="h-4 w-4 mr-2" />
               Add Service
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="w-[95vw] max-w-lg max-h-[85vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-lg">
                 {editingService ? "Edit Service" : "Add New Service"}
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3">
               {/* Form fields remain largely the same, but now map to formData state */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <Label htmlFor="name">Service Name</Label>
+                  <Label htmlFor="name" className="text-sm">
+                    Service Name
+                  </Label>
                   <Input
                     id="name"
                     value={formData.name}
@@ -227,7 +229,9 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="price">Price ($)</Label>
+                  <Label htmlFor="price" className="text-sm">
+                    Price ($)
+                  </Label>
                   <Input
                     id="price"
                     type="number"
@@ -244,9 +248,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <Label htmlFor="category">Category</Label>
+                  <Label htmlFor="category" className="text-sm">
+                    Category
+                  </Label>
                   <Select
                     value={formData.category}
                     onValueChange={(value) =>
@@ -266,7 +272,9 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="duration">Duration</Label>
+                  <Label htmlFor="duration" className="text-sm">
+                    Duration
+                  </Label>
                   <Input
                     id="duration"
                     value={formData.duration}
@@ -279,19 +287,21 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               </div>
 
               <div>
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description" className="text-sm">
+                  Description
+                </Label>
                 <Textarea
                   id="description"
                   value={formData.description}
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  rows={3}
+                  rows={2}
                 />
               </div>
 
               {serviceType === "vet" && (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div className="flex items-center space-x-2">
                     <Switch
                       checked={formData.isEmergency}
@@ -299,7 +309,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         setFormData({ ...formData, isEmergency: checked })
                       }
                     />
-                    <Label>Emergency Service</Label>
+                    <Label className="text-sm">Emergency Service</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Switch
@@ -311,20 +321,21 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         })
                       }
                     />
-                    <Label>Requires Appointment</Label>
+                    <Label className="text-sm">Requires Appointment</Label>
                   </div>
                 </div>
               )}
 
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-2 pt-2">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}
+                  size="sm"
                 >
                   Cancel
                 </Button>
-                <Button type="submit">
+                <Button type="submit" size="sm">
                   {editingService ? "Update" : "Create"} Service
                 </Button>
               </div>
@@ -363,31 +374,35 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     size="sm"
                     variant="outline"
                     onClick={() => handleEdit(service)}
+                    className="flex-1"
                   >
                     <Edit className="h-4 w-4 mr-1" />
                     Edit
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" className="flex-1">
                         <Trash2 className="h-4 w-4 mr-1" />
                         Delete
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent>
+                    <AlertDialogContent className="w-[90vw] max-w-sm">
                       <AlertDialogHeader>
-                        <AlertDialogTitle>
+                        <AlertDialogTitle className="text-base">
                           Are you absolutely sure?
                         </AlertDialogTitle>
-                        <AlertDialogDescription>
+                        <AlertDialogDescription className="text-sm">
                           This action cannot be undone. This will permanently
                           delete the "{service.name}" service.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogFooter className="flex gap-2">
+                        <AlertDialogCancel className="flex-1 text-sm">
+                          Cancel
+                        </AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() => handleDelete(service._id)}
+                          className="flex-1 text-sm"
                         >
                           Continue
                         </AlertDialogAction>

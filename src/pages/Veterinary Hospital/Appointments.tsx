@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Calendar, Clock, Plus, Upload, FileText } from "lucide-react";
+import { Calendar, Clock, Upload, FileText } from "lucide-react";
 import { vetBookingsApi } from "@/lib/api";
 import { toast } from "@/components/ui/use-toast";
 import { VetAppointment, AppointmentFormData } from "@/types/booking";
@@ -119,16 +119,12 @@ const Appointments = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Upcoming Appointments</h2>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Appointment
-        </Button>
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center md:space-y-0">
+        <h2 className="text-xl md:text-2xl font-bold">Upcoming Appointments</h2>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-3 md:gap-4">
         {loading ? (
           <Card>
             <CardContent className="p-6">
@@ -146,11 +142,11 @@ const Appointments = () => {
         ) : (
           appointments.map((appointment) => (
             <Card key={appointment.appointmentId}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+              <CardContent className="p-4 md:p-6">
+                <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
+                  <div className="flex items-start md:items-center gap-3 md:gap-4">
                     <div
-                      className={`p-2 rounded-lg ${
+                      className={`p-2 rounded-lg flex-shrink-0 ${
                         appointment.status === "completed"
                           ? "bg-green-100"
                           : appointment.status === "in_progress"
@@ -161,7 +157,7 @@ const Appointments = () => {
                       }`}
                     >
                       <Calendar
-                        className={`h-5 w-5 ${
+                        className={`h-4 w-4 md:h-5 md:w-5 ${
                           appointment.status === "completed"
                             ? "text-green-600"
                             : appointment.status === "in_progress"
@@ -172,25 +168,27 @@ const Appointments = () => {
                         }`}
                       />
                     </div>
-                    <div>
-                      <h3 className="font-semibold">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-sm md:text-base break-words">
                         {appointment.patientName} - {appointment.serviceName}
                       </h3>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-xs md:text-sm text-gray-600 truncate">
                         Owner: {appointment.petParent}
                       </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Clock className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-600">
-                          {new Date(
-                            appointment.appointmentTime
-                          ).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
+                      <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 mt-1">
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-3 w-3 md:h-4 md:w-4 text-gray-400 flex-shrink-0" />
+                          <span className="text-xs md:text-sm text-gray-600">
+                            {new Date(
+                              appointment.appointmentTime
+                            ).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        </div>
                         <span
-                          className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
+                          className={`px-2 py-1 rounded-full text-xs font-medium w-fit ${
                             appointment.status === "completed"
                               ? "bg-green-100 text-green-800"
                               : appointment.status === "in_progress"
@@ -205,11 +203,12 @@ const Appointments = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-3">
                     {appointment.status === "confirmed" && (
                       <Button
                         size="sm"
                         variant="outline"
+                        className="w-full md:w-auto"
                         onClick={() =>
                           handleStatusUpdate(
                             appointment.appointmentId,
@@ -225,30 +224,33 @@ const Appointments = () => {
                         <Button
                           size="sm"
                           variant="outline"
+                          className="w-full md:w-auto"
                           onClick={() => setSelectedAppointment(appointment)}
                         >
                           View Details
                         </Button>
                       </DialogTrigger>
                       {selectedAppointment && (
-                        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                        <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] md:max-h-[80vh] overflow-y-auto">
                           <DialogHeader>
-                            <DialogTitle>Appointment Details</DialogTitle>
+                            <DialogTitle className="text-lg md:text-xl">
+                              Appointment Details
+                            </DialogTitle>
                           </DialogHeader>
-                          <div className="space-y-6">
+                          <div className="space-y-4 md:space-y-6">
                             {/* Pet and Owner Details */}
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div>
-                                <h4 className="font-semibold mb-2">
+                                <h4 className="font-semibold mb-2 text-sm md:text-base">
                                   Pet Information
                                 </h4>
-                                <div className="space-y-1 text-sm">
-                                  <p>
+                                <div className="space-y-1 text-xs md:text-sm">
+                                  <p className="break-words">
                                     <strong>Name:</strong>{" "}
                                     {selectedAppointment.patientName}
                                   </p>
                                   {selectedAppointment.symptoms && (
-                                    <p>
+                                    <p className="break-words">
                                       <strong>Symptoms:</strong>{" "}
                                       {selectedAppointment.symptoms}
                                     </p>
@@ -262,11 +264,11 @@ const Appointments = () => {
                                 </div>
                               </div>
                               <div>
-                                <h4 className="font-semibold mb-2">
+                                <h4 className="font-semibold mb-2 text-sm md:text-base">
                                   Owner Information
                                 </h4>
-                                <div className="space-y-1 text-sm">
-                                  <p>
+                                <div className="space-y-1 text-xs md:text-sm">
+                                  <p className="break-words">
                                     <strong>Name:</strong>{" "}
                                     {selectedAppointment.petParent}
                                   </p>

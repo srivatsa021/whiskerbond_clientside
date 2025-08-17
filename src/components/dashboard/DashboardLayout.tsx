@@ -32,7 +32,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
+              <h1 className="text-lg md:text-xl font-semibold text-gray-900">
+                {title}
+              </h1>
             </div>
 
             <div className="flex items-center gap-4">
@@ -46,9 +48,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   <p className="text-sm font-medium text-gray-900">
                     {user?.name}
                   </p>
-                  <p className="text-xs text-gray-500">
-                    {user?.businessName}
-                  </p>
+                  <p className="text-xs text-gray-500">{user?.businessName}</p>
                 </div>
               </div>
 
@@ -56,7 +56,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={logout}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 border-red-500 text-red-600 hover:bg-red-50 hover:text-red-700"
               >
                 <LogOut className="h-4 w-4" />
                 Logout
@@ -78,8 +78,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     Welcome, {user?.name}
                   </h2>
                   <p className="text-sm text-gray-600">
-                    {user?.businessName} -{" "}
-                    {user?.address}
+                    {user?.businessName} - {user?.address}
                   </p>
                 </div>
               </div>

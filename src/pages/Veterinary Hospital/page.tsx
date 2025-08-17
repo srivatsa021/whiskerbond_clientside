@@ -12,13 +12,33 @@ const VetHospitalPage = () => {
       <Tabs
         value={activeTab}
         onValueChange={setActiveTab}
-        className="space-y-6"
+        className="space-y-2 md:space-y-6"
       >
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="appointments">Appointments</TabsTrigger>
-          <TabsTrigger value="services">Services</TabsTrigger>
-          <TabsTrigger value="finance">Finances</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto p-1">
+          <TabsTrigger
+            value="appointments"
+            className="text-xs md:text-sm h-8 md:h-10"
+          >
+            Appointments
+          </TabsTrigger>
+          <TabsTrigger
+            value="services"
+            className="text-xs md:text-sm h-8 md:h-10"
+          >
+            Services
+          </TabsTrigger>
+          <TabsTrigger
+            value="finance"
+            className="text-xs md:text-sm h-8 md:h-10"
+          >
+            Finances
+          </TabsTrigger>
+          <TabsTrigger
+            value="settings"
+            className="text-xs md:text-sm h-8 md:h-10"
+          >
+            Settings
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="appointments">
