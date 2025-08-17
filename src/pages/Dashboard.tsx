@@ -5,7 +5,7 @@ import { VetHospitalPage } from "./Veterinary Hospital";
 import PetTrainerDashboard from "./Pet Trainer";
 import PetBoardingDashboard from "./Pet Boarding";
 import WalkerDashboard from "./dashboard/WalkerDashboard";
-import NGODashboard from "./dashboard/NGODashboard";
+import NGOShelterDashboard from "./NGO Shelter";
 
 const Dashboard = () => {
   const { user, isLoading } = useAuth();
@@ -36,7 +36,7 @@ const Dashboard = () => {
     case "walker":
       return <WalkerDashboard />;
     case "ngo":
-      return <NGODashboard />;
+      return <NGOShelterDashboard />;
     default:
       return (
         <div className="min-h-screen flex items-center justify-center">
