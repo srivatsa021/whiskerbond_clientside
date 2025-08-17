@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { VetHospitalPage } from "./Veterinary Hospital";
 import PetTrainerDashboard from "./Pet Trainer";
-import BoardingDashboard from "./dashboard/BoardingDashboard";
+import PetBoardingDashboard from "./Pet Boarding";
 import WalkerDashboard from "./dashboard/WalkerDashboard";
 import NGODashboard from "./dashboard/NGODashboard";
 
@@ -32,7 +32,7 @@ const Dashboard = () => {
     case "trainer":
       return <PetTrainerDashboard />;
     case "boarding":
-      return <BoardingDashboard />;
+      return <PetBoardingDashboard />;
     case "walker":
       return <WalkerDashboard />;
     case "ngo":
