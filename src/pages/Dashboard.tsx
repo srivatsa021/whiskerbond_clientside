@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import VetDashboard from "./dashboard/VetDashboard";
+import { VetHospitalPage } from "./Veterinary Hospital";
 import TrainerDashboard from "./dashboard/TrainerDashboard";
 import BoardingDashboard from "./dashboard/BoardingDashboard";
 import WalkerDashboard from "./dashboard/WalkerDashboard";
@@ -28,7 +28,7 @@ const Dashboard = () => {
 
   switch (user.businessType) {
     case "vet":
-      return <VetDashboard />;
+      return <VetHospitalPage />;
     case "trainer":
       return <TrainerDashboard />;
     case "boarding":
