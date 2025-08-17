@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { VetHospitalPage } from "./Veterinary Hospital";
 import PetTrainerDashboard from "./Pet Trainer";
 import PetBoardingDashboard from "./Pet Boarding";
-import WalkerDashboard from "./dashboard/WalkerDashboard";
+import PetWalkerDashboard from "./Pet Walker";
 import NGOShelterDashboard from "./NGO Shelter";
 
 const Dashboard = () => {
@@ -34,7 +34,7 @@ const Dashboard = () => {
     case "boarding":
       return <PetBoardingDashboard />;
     case "walker":
-      return <WalkerDashboard />;
+      return <PetWalkerDashboard />;
     case "ngo":
       return <NGOShelterDashboard />;
     default:
