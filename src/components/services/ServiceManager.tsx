@@ -60,6 +60,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 }) => {
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const { user } = useAuth();
@@ -83,13 +84,36 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
   const fetchServices = async () => {
     setIsLoading(true);
+    setError(null);
     try {
+      if (!user) {
+        throw new Error("Please log in to manage services");
+      }
+
       const data = await api.getServices();
       setServices(
         data.map((s: any) => ({ ...s, name: s.serviceName || s.name }))
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to fetch services", error);
+
+      let errorMessage = "Failed to load services";
+      if (error.status === 401) {
+        errorMessage = "Authentication required. Please log in again.";
+      } else if (error.status === 404) {
+        errorMessage = serviceType === "vet"
+          ? "Vet profile not found. Please set up your veterinary profile first."
+          : "Profile not found. Please set up your business profile first.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -193,6 +217,17 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
   if (isLoading) {
     return <div className="p-4">Loading services...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 text-center space-y-4">
+        <div className="text-red-600">{error}</div>
+        <Button onClick={fetchServices} variant="outline">
+          Try Again
+        </Button>
+      </div>
+    );
   }
 
   return (

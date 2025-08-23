@@ -8,9 +8,10 @@ const router = express.Router();
 // Get all services for the authenticated vet
 router.get("/", authenticateToken, async (req, res) => {
   try {
-    const vet = await Vet.findOne({ userId: req.userId });
+    let vet = await Vet.findOne({ userId: req.userId });
     if (!vet) {
-      return res.status(404).json({ message: "Vet profile not found" });
+      // Auto-create vet profile if it doesn't exist
+      vet = await Vet.create({ userId: req.userId });
     }
     res.json(vet.services);
   } catch (error) {
@@ -32,9 +33,10 @@ router.post("/", authenticateToken, async (req, res) => {
       isEmergency,
     } = req.body;
 
-    const vet = await Vet.findOne({ userId: req.userId });
+    let vet = await Vet.findOne({ userId: req.userId });
     if (!vet) {
-      return res.status(404).json({ message: "Vet profile not found" });
+      // Auto-create vet profile if it doesn't exist
+      vet = await Vet.create({ userId: req.userId });
     }
 
     const newService = {
@@ -71,9 +73,10 @@ router.put("/:serviceId", authenticateToken, async (req, res) => {
       isEmergency,
     } = req.body;
 
-    const vet = await Vet.findOne({ userId: req.userId });
+    let vet = await Vet.findOne({ userId: req.userId });
     if (!vet) {
-      return res.status(404).json({ message: "Vet profile not found" });
+      // Auto-create vet profile if it doesn't exist
+      vet = await Vet.create({ userId: req.userId });
     }
 
     const service = vet.services.id(serviceId);
@@ -102,9 +105,10 @@ router.delete("/:serviceId", authenticateToken, async (req, res) => {
   try {
     const { serviceId } = req.params;
 
-    const vet = await Vet.findOne({ userId: req.userId });
+    let vet = await Vet.findOne({ userId: req.userId });
     if (!vet) {
-      return res.status(404).json({ message: "Vet profile not found" });
+      // Auto-create vet profile if it doesn't exist
+      vet = await Vet.create({ userId: req.userId });
     }
 
     const service = vet.services.id(serviceId);
