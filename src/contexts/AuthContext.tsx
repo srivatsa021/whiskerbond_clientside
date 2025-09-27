@@ -44,6 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         businessName: userData.businessName,
         address: userData.address,
         contactNo: userData.contactNo,
+        images: userData.images,
       });
     } catch (error) {
       console.error("❌ Failed to check auth status:", error);
@@ -69,6 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         businessName: response.user.businessName,
         address: response.user.address,
         contactNo: response.user.contactNo,
+        images: response.user.images,
       });
       return true;
     } catch (error: any) {
@@ -98,6 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         businessName: credentials.businessName,
         address: credentials.address,
         contactNo: credentials.contactNo,
+        images: credentials.images,
       });
 
       localStorage.setItem("token", response.token);
@@ -109,6 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         businessName: response.user.businessName,
         address: response.user.address,
         contactNo: response.user.contactNo,
+        images: response.user.images,
       });
 
       return true;

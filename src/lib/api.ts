@@ -105,6 +105,7 @@ export const authApi = {
     businessName: string;
     address: string;
     contactNo?: string;
+    images?: string[];
   }) =>
     makeRequest("/auth/register", {
       method: "POST",
@@ -123,6 +124,12 @@ export const authApi = {
     makeRequest("/auth/profile", {
       method: "PUT",
       body: JSON.stringify(profileData),
+    }),
+
+  updateImages: (images: string[]) =>
+    makeRequest("/auth/profile/images", {
+      method: "PUT",
+      body: JSON.stringify({ images }),
     }),
 };
 

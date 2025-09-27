@@ -55,6 +55,7 @@ router.post("/register", async (req, res) => {
       businessType,
       address,
       password,
+      images,
     } = req.body;
 
     // --- Input Validation for Registration ---
@@ -85,6 +86,23 @@ router.post("/register", async (req, res) => {
         .json({ message: "User already registered for this business type" });
     }
 
+    // Validate images if provided
+    let processedImages = [];
+    if (images !== undefined) {
+      if (!Array.isArray(images)) {
+        return res.status(400).json({ message: "Images must be an array" });
+      }
+      if (images.length > 10) {
+        return res.status(400).json({ message: "A maximum of 10 images are allowed" });
+      }
+      for (const img of images) {
+        if (typeof img !== "string" || !img.startsWith("data:image")) {
+          return res.status(400).json({ message: "Invalid image format. Must be base64 data URL." });
+        }
+      }
+      processedImages = images;
+    }
+
     const newUser = new BUser({
       businessName,
       name,
@@ -93,6 +111,7 @@ router.post("/register", async (req, res) => {
       businessType,
       address,
       password,
+      images: processedImages,
     });
 
     await newUser.save();
@@ -145,6 +164,7 @@ router.post("/register", async (req, res) => {
         contactNo: newUser.contactNo,
         businessType: newUser.businessType,
         address: newUser.address,
+        images: newUser.images,
       },
     });
   } catch (error) {
@@ -190,6 +210,7 @@ router.post("/login", async (req, res) => {
         contactNo: user.contactNo,
         businessType: user.businessType,
         address: user.address,
+        images: user.images,
       },
     });
   } catch (error) {
@@ -215,6 +236,7 @@ router.get("/me", authenticateToken, async (req, res) => {
       contactNo: user.contactNo,
       businessType: user.businessType,
       address: user.address,
+      images: user.images,
     });
   } catch (error) {
     console.error("Get user error:", error);
@@ -322,5 +344,37 @@ router.put("/profile", authenticateToken, async (req, res) => {
   }
 });
 
-export default router;
+// Update user images (replace entire array)
+router.put("/profile/images", authenticateToken, async (req, res) => {
+  try {
+    const { images } = req.body;
+    if (!Array.isArray(images)) {
+      return res.status(400).json({ message: "Images must be an array" });
+    }
+    if (images.length > 10) {
+      return res.status(400).json({ message: "A maximum of 10 images are allowed" });
+    }
+    for (const img of images) {
+      if (typeof img !== "string" || !img.startsWith("data:image")) {
+        return res.status(400).json({ message: "Invalid image format. Must be base64 data URL." });
+      }
+    }
 
+    const updated = await BUser.findByIdAndUpdate(
+      req.userId,
+      { $set: { images } },
+      { new: true, runValidators: true }
+    ).select("images");
+
+    if (!updated) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ images: updated.images });
+  } catch (error) {
+    console.error("Update images error:", error);
+    res.status(500).json({ message: "Server error updating images" });
+  }
+});
+
+export default router;

@@ -10,10 +10,20 @@ const bUserSchema = new mongoose.Schema(
     businessType: {
       type: String,
       required: true,
-      enum: ["vet", "trainer", "boarding", "walker", "ngo"], // Add more if needed
+      enum: ["vet", "trainer", "boarding", "walker", "ngo"],
     },
     address: { type: String, required: true },
     password: { type: String, required: true },
+    images: {
+      type: [String],
+      default: [],
+      validate: [
+        function (arr) {
+          return Array.isArray(arr) && arr.length <= 10;
+        },
+        "A maximum of 10 images are allowed",
+      ],
+    },
   },
   {
     timestamps: true,

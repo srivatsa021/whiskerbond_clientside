@@ -6,13 +6,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Video, Stethoscope, User } from "lucide-react";
+import { Video, Stethoscope, User, Image as ImageIcon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { authApi, vetProfileApi } from "@/lib/api";
 import { toast } from "@/components/ui/use-toast";
 import { useForm } from "react-hook-form";
+import PhotoManager from "@/components/profile/PhotoManager";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+
 
 const personalInfoSchema = z.object({
   name: z.string().min(3, { message: "Name must be at least 3 characters." }),
@@ -61,6 +63,12 @@ const VetSettings = () => {
       setBusinessName(user.businessName);
     }
   }, [user, reset]);
+
+  const [photos, setPhotos] = useState<string[]>(user?.images || []);
+
+  useEffect(() => {
+    setPhotos(user?.images || []);
+  }, [user]);
 
   const onSavePersonalInfo = async (data: PersonalInfoFormData) => {
     if (!user) return;
@@ -338,6 +346,36 @@ const VetSettings = () => {
                 </Button>
               </CardContent>
             </form>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
+                <ImageIcon className="h-4 w-4 md:h-5 md:w-5" />
+                Photos
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <PhotoManager value={photos} onChange={setPhotos} />
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  onClick={async () => {
+                    if (!user) return;
+                    try {
+                      const updated = await authApi.updateImages(photos.slice(0, 10));
+                      setUser((prev) => (prev ? { ...prev, images: updated.images } : prev));
+                      toast({ title: "Success", description: "Photos updated" });
+                    } catch (e) {
+                      console.error(e);
+                      toast({ title: "Error", description: "Failed to update photos", variant: "destructive" });
+                    }
+                  }}
+                >
+                  Save Photos
+                </Button>
+              </div>
+            </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
