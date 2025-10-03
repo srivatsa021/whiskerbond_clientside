@@ -1,4 +1,4 @@
-export type BusinessType = "vet" | "trainer" | "boarding" | "walker" | "ngo";
+export type BusinessType = "vet" | "trainer" | "boarding" | "walker" | "ngo" | "groomer";
 
 export interface User {
   id: string;

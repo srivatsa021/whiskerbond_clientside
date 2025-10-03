@@ -150,6 +150,39 @@ export const vetServicesApi = {
     makeRequest(`/vet-services/${id}`, { method: "DELETE" }),
 };
 
+// Groomer Services API
+export const groomerServicesApi = {
+  getServices: () => makeRequest(`/groomer-services`),
+  createService: (serviceData: any) =>
+    makeRequest("/groomer-services", {
+      method: "POST",
+      body: JSON.stringify(serviceData),
+    }),
+  updateService: (id: string, serviceData: any) =>
+    makeRequest(`/groomer-services/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(serviceData),
+    }),
+  deleteService: (id: string) =>
+    makeRequest(`/groomer-services/${id}`, { method: "DELETE" }),
+};
+
+// Groomer Profile API
+export const groomerProfileApi = {
+  getProfile: () => makeRequest(`/groomer-profile`),
+  updateProfile: (profileData: {
+    establishmentRegistrationNumber?: string;
+    establishmentRegistrationAuthority?: string;
+    establishmentRegistrationDocumentUrl?: string;
+    identityProofType?: string;
+    identityProofUrl?: string;
+  }) =>
+    makeRequest(`/groomer-profile`, {
+      method: "PUT",
+      body: JSON.stringify(profileData),
+    }),
+};
+
 // Vet Profile API
 export const vetProfileApi = {
   getProfile: () => makeRequest(`/vet-profile`),
@@ -218,6 +251,33 @@ export const vetBookingsApi = {
     makeRequest(`/vet-bookings/${bookingId}/documents`, {
       method: "POST",
       body: JSON.stringify(documentData),
+    }),
+};
+
+// Groomer Bookings API
+export const groomerBookingsApi = {
+  // Get all bookings for the groomer
+  getBookings: (params?: { status?: string; date?: string; limit?: number }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.status) queryParams.append("status", params.status);
+    if (params?.date) queryParams.append("date", params.date);
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+
+    const query = queryParams.toString();
+    return makeRequest(`/groomer-bookings${query ? `?${query}` : ""}`);
+  },
+
+  // Get upcoming appointments (next 7 days)
+  getUpcomingBookings: () => makeRequest("/groomer-bookings/upcoming"),
+
+  // Get specific booking details
+  getBooking: (bookingId: string) => makeRequest(`/groomer-bookings/${bookingId}`),
+
+  // Update appointment status
+  updateStatus: (bookingId: string, status: string) =>
+    makeRequest(`/groomer-bookings/${bookingId}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
     }),
 };
 

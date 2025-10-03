@@ -10,7 +10,7 @@ const bUserSchema = new mongoose.Schema(
     businessType: {
       type: String,
       required: true,
-      enum: ["vet", "trainer", "boarding", "walker", "ngo"],
+      enum: ["vet", "trainer", "boarding", "walker", "ngo", "groomer"],
     },
     address: { type: String, required: true },
     password: { type: String, required: true },

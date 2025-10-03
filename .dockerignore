@@ -1,0 +1,26 @@
+# Ignore dependencies and build output from local machine
+node_modules
+**/node_modules
+
+# Local build output (Docker will build inside image)
+dist
+**/dist
+
+# VCS and metadata
+.git
+.gitignore
+Dockerfile
+.dockerignore
+
+# Logs and caches
+npm-debug.log*
+yarn-error.log
+pnpm-error.log
+logs
+*.log
+.vscode
+.vite
+
+# Env files (set via Docker ENV or runtime flags)
+.env
+server/.env

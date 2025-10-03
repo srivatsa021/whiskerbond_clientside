@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Edit, Trash2 } from "lucide-react";
-import { servicesApi, vetServicesApi } from "@/lib/api";
+import { servicesApi, vetServicesApi, groomerServicesApi } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
@@ -65,7 +65,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   const [editingService, setEditingService] = useState<Service | null>(null);
   const { user } = useAuth();
 
-  const api = serviceType === "vet" ? vetServicesApi : servicesApi;
+  const api = serviceType === "vet" ? vetServicesApi : serviceType === "groomer" ? groomerServicesApi : servicesApi;
 
   // Service form state
   const [formData, setFormData] = useState({
@@ -284,28 +284,30 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <Label htmlFor="category" className="text-sm">
-                    Category
-                  </Label>
-                  <Select
-                    value={formData.category}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, category: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {getServiceCategories().map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {serviceType === "vet" && (
+                  <div>
+                    <Label htmlFor="category" className="text-sm">
+                      Category
+                    </Label>
+                    <Select
+                      value={formData.category}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, category: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getServiceCategories().map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
                 <div>
                   <Label htmlFor="duration" className="text-sm">
                     Duration
@@ -403,7 +405,9 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     </span>
                   )}
                 </div>
-                <Badge variant="outline">{service.category}</Badge>
+                {serviceType === "vet" && service.category && (
+                  <Badge variant="outline">{service.category}</Badge>
+                )}
                 <div className="flex gap-2 mt-4">
                   <Button
                     size="sm"

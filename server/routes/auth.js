@@ -7,6 +7,7 @@ import Boarding from "../models/Boarding.js";
 import Trainer from "../models/Trainer.js";
 import Vet from "../models/Vet.js";
 import NGO from "../models/NGO.js";
+import Groomer from "../models/Groomer.js";
 import { authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -141,6 +142,12 @@ router.post("/register", async (req, res) => {
       if (!existingVet) {
         await Vet.create({ userId: newUser._id });
         console.log(`✅ Vet profile created for ${newUser.email}`);
+      }
+    } else if (newUser.businessType === "groomer") {
+      const existingGroomer = await Groomer.findOne({ userId: newUser._id });
+      if (!existingGroomer) {
+        await Groomer.create({ userId: newUser._id });
+        console.log(`✅ Groomer profile created for ${newUser.email}`);
       }
     } else if (newUser.businessType === "ngo") {
       const existingNGO = await NGO.findOne({ userId: newUser._id });

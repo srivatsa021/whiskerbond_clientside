@@ -37,6 +37,7 @@ const signupSchema = z
       "boarding",
       "walker",
       "ngo",
+      "groomer",
     ] as const),
     businessName: z.string().min(2, "Business name is required"),
     address: z.string().min(10, "Enter a valid address"),
@@ -230,6 +231,9 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin }) => {
                   </SelectItem>
                   <SelectItem value="ngo" className="text-sm md:text-base">
                     NGO/Shelter
+                  </SelectItem>
+                  <SelectItem value="groomer" className="text-sm md:text-base">
+                    Groomer
                   </SelectItem>
                 </SelectContent>
               </Select>
