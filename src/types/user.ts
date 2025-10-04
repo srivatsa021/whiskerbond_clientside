@@ -1,4 +1,4 @@
-export type BusinessType = "vet" | "trainer" | "boarding" | "walker" | "ngo";
+export type BusinessType = "vet" | "trainer" | "boarding" | "walker" | "ngo" | "groomer";
 
 export interface User {
   id: string;
@@ -8,6 +8,7 @@ export interface User {
   businessName: string;
   address: string;
   contactNo?: string;
+  images?: string[];
 }
 
 export interface LoginCredentials {
@@ -22,6 +23,7 @@ export interface SignupCredentials extends LoginCredentials {
   businessName: string;
   address: string;
   contactNo?: string;
+  images?: string[];
 }
 
 export interface AuthContextType {

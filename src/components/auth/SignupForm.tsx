@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/AuthContext";
+import PhotoManager from "@/components/profile/PhotoManager";
+
 
 const signupSchema = z
   .object({
@@ -35,6 +37,7 @@ const signupSchema = z
       "boarding",
       "walker",
       "ngo",
+      "groomer",
     ] as const),
     businessName: z.string().min(2, "Business name is required"),
     address: z.string().min(10, "Enter a valid address"),
@@ -55,6 +58,7 @@ interface SignupFormProps {
 export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin }) => {
   const [error, setError] = useState<string>("");
   const { signup, isLoading } = useAuth();
+  const [images, setImages] = useState<string[]>([]);
 
   const {
     register,
@@ -80,6 +84,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin }) => {
       businessName: data.businessName,
       address: data.address,
       contactNo: data.contactNo,
+      images: images.slice(0, 10),
     };
 
     const result = await signup(signupData);
@@ -103,7 +108,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin }) => {
       </CardHeader>
       <CardContent className="space-y-4 md:space-y-6 px-4 md:px-8 pb-6 md:pb-8">
         <form
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={(e) => e.preventDefault()}
           className="space-y-4 md:space-y-5"
         >
           {/* Name and Email in grid for desktop */}
@@ -227,6 +232,9 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin }) => {
                   <SelectItem value="ngo" className="text-sm md:text-base">
                     NGO/Shelter
                   </SelectItem>
+                  <SelectItem value="groomer" className="text-sm md:text-base">
+                    Groomer
+                  </SelectItem>
                 </SelectContent>
               </Select>
               {errors.businessType && (
@@ -296,6 +304,11 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin }) => {
             </div>
           </div>
 
+          <div className="space-y-2">
+            <Label className="text-sm md:text-base font-medium">Photos (up to 10)</Label>
+            <PhotoManager value={images} onChange={setImages} />
+          </div>
+
           {error && (
             <Alert variant="destructive" className="text-xs md:text-sm">
               <AlertDescription>{error}</AlertDescription>
@@ -303,7 +316,8 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin }) => {
           )}
 
           <Button
-            type="submit"
+            type="button"
+            onClick={() => handleSubmit(onSubmit)()}
             className="w-full h-10 md:h-11 text-sm md:text-base font-medium mt-4 md:mt-6"
             disabled={isLoading}
           >
