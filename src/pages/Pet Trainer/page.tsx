@@ -1,18 +1,19 @@
 import React from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sessions, TrainingPlans, Finances, SOS, Settings } from "./index";
+import { Sessions, Finances, SOS, Settings } from "./index";
+import Services from "./Services";
 
 const PetTrainerDashboard = () => {
   return (
     <DashboardLayout title="Pet Trainer Dashboard">
-      <Tabs defaultValue="sessions" className="space-y-4 md:space-y-6">
+      <Tabs defaultValue="appointments" className="space-y-4 md:space-y-6">
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 gap-1 h-auto p-1">
-          <TabsTrigger value="sessions" className="text-xs md:text-sm py-2">
-            Sessions
+          <TabsTrigger value="appointments" className="text-xs md:text-sm py-2">
+            Appointments
           </TabsTrigger>
-          <TabsTrigger value="plans" className="text-xs md:text-sm py-2">
-            Training Plans
+          <TabsTrigger value="services" className="text-xs md:text-sm py-2">
+            Services
           </TabsTrigger>
           <TabsTrigger value="finances" className="text-xs md:text-sm py-2">
             Finances
@@ -25,12 +26,12 @@ const PetTrainerDashboard = () => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="sessions">
+        <TabsContent value="appointments">
           <Sessions />
         </TabsContent>
 
-        <TabsContent value="plans">
-          <TrainingPlans />
+        <TabsContent value="services">
+          <Services />
         </TabsContent>
 
         <TabsContent value="finances">

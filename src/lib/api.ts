@@ -1,22 +1,11 @@
 // Auto-detect API URL based on environment
 const getApiBaseUrl = () => {
-  // Check for explicit environment variable first
+  // 1) Explicit override wins
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
   }
-
-  // If we're in development mode with localhost
-  if (
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1"
-  ) {
-    return "http://localhost:5000/api";
-  }
-
-  // For deployed environments, check if backend is available on same host
-  // If not, we'll gracefully fall back to localStorage
-  const baseUrl = `${window.location.protocol}//${window.location.hostname}`;
-  return `${baseUrl}/api`;
+  // 2) Default to same-origin proxy (works in this platform and prod)
+  return `${window.location.origin}/api`;
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -281,6 +270,53 @@ export const groomerBookingsApi = {
     }),
 };
 
+// Trainer Bookings API
+export const trainerBookingsApi = {
+  getBookings: (params?: { status?: string; date?: string; limit?: number }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.status) queryParams.append("status", params.status);
+    if (params?.date) queryParams.append("date", params.date);
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+
+    const query = queryParams.toString();
+    return makeRequest(`/trainer-bookings${query ? `?${query}` : ""}`);
+  },
+  getBooking: (bookingId: string) => makeRequest(`/trainer-bookings/${bookingId}`),
+  createBooking: (payload: {
+    serviceId: string;
+    startDate: string;
+    timeOfDay?: string;
+    ownerId?: string;
+    petId?: string;
+    clientName?: string;
+    petName?: string;
+  }) =>
+    makeRequest(`/trainer-bookings`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  updateStatus: (bookingId: string, status: string) =>
+    makeRequest(`/trainer-bookings/${bookingId}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+  updateSessionStatus: (bookingId: string, index: number, status: "pending" | "completed" | "missed", progressNotes?: string) =>
+    makeRequest(`/trainer-bookings/${bookingId}/sessions/${index}`, {
+      method: "PATCH",
+      body: JSON.stringify({ status, ...(progressNotes !== undefined && { progressNotes }) }),
+    }),
+  extendBooking: (bookingId: string, payload: { additionalDays: number; timeOfDay?: string }) =>
+    makeRequest(`/trainer-bookings/${bookingId}/extend`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  completeAppointment: (bookingId: string, payload: { followUpRequired?: boolean; followUpDate?: string; notes?: string }) =>
+    makeRequest(`/trainer-bookings/${bookingId}/complete`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+};
+
 // Trainer Plans API
 export const trainerPlansApi = {
   getPlans: () => makeRequest(`/trainer-plans`),
@@ -296,6 +332,42 @@ export const trainerPlansApi = {
     }),
   deletePlan: (id: string) =>
     makeRequest(`/trainer-plans/${id}`, { method: "DELETE" }),
+};
+
+// Trainer Services API (tiered services)
+export const trainerServicesApi = {
+  getServices: () => makeRequest(`/trainer-services`),
+  createService: (serviceData: any) =>
+    makeRequest("/trainer-services", {
+      method: "POST",
+      body: JSON.stringify(serviceData),
+    }),
+  updateService: (id: string, serviceData: any) =>
+    makeRequest(`/trainer-services/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(serviceData),
+    }),
+  deleteService: (id: string) =>
+    makeRequest(`/trainer-services/${id}`, { method: "DELETE" }),
+  // Public endpoints (no auth) to view a trainer's services
+  getPublicByUser: (userId: string) => makeRequest(`/trainer-services/public/by-user/${userId}`),
+  getPublicByTrainer: (trainerId: string) => makeRequest(`/trainer-services/public/by-trainer/${trainerId}`),
+};
+
+// Trainer Profile API (registration/identity)
+export const trainerProfileApi = {
+  getProfile: () => makeRequest(`/trainer-profile`),
+  updateProfile: (profileData: {
+    registrationNumber?: string;
+    registrationAuthority?: string;
+    registrationDocumentUrl?: string;
+    identityProofType?: string;
+    identityProofUrl?: string;
+  }) =>
+    makeRequest(`/trainer-profile`, {
+      method: "PUT",
+      body: JSON.stringify(profileData),
+    }),
 };
 
 // NGO Pets API

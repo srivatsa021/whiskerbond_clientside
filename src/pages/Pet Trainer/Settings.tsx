@@ -6,9 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Video, Clock, FileText, Bell } from "lucide-react";
+import { Video, Clock, FileText, Bell, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { authApi } from "@/lib/api";
+import { authApi, trainerProfileApi } from "@/lib/api";
 import { toast } from "@/components/ui/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -89,6 +89,29 @@ const Settings = () => {
       });
     }
   };
+
+  // Trainer verification/settings
+  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [registrationAuthority, setRegistrationAuthority] = useState("");
+  const [registrationDocumentUrl, setRegistrationDocumentUrl] = useState("");
+  const [identityProofType, setIdentityProofType] = useState("");
+  const [identityProofUrl, setIdentityProofUrl] = useState("");
+
+  useEffect(() => {
+    const fetchTrainerProfile = async () => {
+      try {
+        const profile = await trainerProfileApi.getProfile();
+        setRegistrationNumber(profile?.registrationNumber || "");
+        setRegistrationAuthority(profile?.registrationAuthority || "");
+        setRegistrationDocumentUrl(profile?.registrationDocumentUrl || "");
+        setIdentityProofType(profile?.identityProofType || "");
+        setIdentityProofUrl(profile?.identityProofUrl || "");
+      } catch (e) {
+        // optional
+      }
+    };
+    fetchTrainerProfile();
+  }, []);
 
   const handleSaveChanges = () => {
     console.log("General Settings Saved:", {
@@ -293,6 +316,56 @@ const Settings = () => {
                     placeholder="Detail your cancellation policy here..."
                     rows={3}
                   />
+                </div>
+              </div>
+
+              <div className="space-y-4 border-b pb-4">
+                <h3 className="text-base md:text-lg font-semibold flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 md:h-5 md:w-5 text-emerald-600" />
+                  Trainer Verification
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm">Registration Number</Label>
+                    <Input value={registrationNumber} onChange={(e) => setRegistrationNumber(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label className="text-sm">Registration Authority</Label>
+                    <Input value={registrationAuthority} onChange={(e) => setRegistrationAuthority(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label className="text-sm">Registration Document URL</Label>
+                    <Input value={registrationDocumentUrl} onChange={(e) => setRegistrationDocumentUrl(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label className="text-sm">Identity Proof Type</Label>
+                    <Input value={identityProofType} onChange={(e) => setIdentityProofType(e.target.value)} placeholder="Aadhaar, DL, Passport" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label className="text-sm">Identity Proof URL</Label>
+                    <Input value={identityProofUrl} onChange={(e) => setIdentityProofUrl(e.target.value)} />
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <Button
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        await trainerProfileApi.updateProfile({
+                          registrationNumber,
+                          registrationAuthority,
+                          registrationDocumentUrl,
+                          identityProofType,
+                          identityProofUrl,
+                        });
+                        toast({ title: "Saved", description: "Verification details updated" });
+                      } catch (e) {
+                        toast({ title: "Error", description: "Failed to save verification details", variant: "destructive" });
+                      }
+                    }}
+                  >
+                    Save Verification
+                  </Button>
                 </div>
               </div>
 

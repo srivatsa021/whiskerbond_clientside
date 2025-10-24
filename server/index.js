@@ -14,6 +14,10 @@ import vetBookingRoutes from "./routes/vet_bookings.js";
 import groomerServiceRoutes from "./routes/groomer_services.js";
 import groomerProfileRoutes from "./routes/groomer_profile.js";
 import groomerBookingRoutes from "./routes/groomer_bookings.js";
+import trainerServiceRoutes from "./routes/trainer_services.js";
+import trainerProfileRoutes from "./routes/trainer_profile.js";
+import trainerBookingRoutes from "./routes/trainer_bookings.js";
+import trainersRoutes from "./routes/trainers.js";
 
 // Load .env from the server folder (if present)
 dotenv.config({ path: path.resolve("./server/.env") });
@@ -56,6 +60,10 @@ app.use("/api/vet-bookings", vetBookingRoutes);
 app.use("/api/groomer-services", groomerServiceRoutes);
 app.use("/api/groomer-profile", groomerProfileRoutes);
 app.use("/api/groomer-bookings", groomerBookingRoutes);
+app.use("/api/trainer-services", trainerServiceRoutes);
+app.use("/api/trainer-profile", trainerProfileRoutes);
+app.use("/api/trainer-bookings", trainerBookingRoutes);
+app.use("/api/trainers", trainersRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {
