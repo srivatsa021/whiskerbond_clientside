@@ -489,7 +489,32 @@ router.patch("/:appointmentId/sessions/:index", authMiddleware, async (req, res)
       }));
       console.log(`Using appointment.sessionDates with length=${sessionsArray.length}`);
     } else {
-      console.log('No sessions source found for appointment');
+      // No explicit sessions found; attempt to generate sessions using the same logic
+      // used when creating/fetching appointments so trainers with legacy or missing
+      // session arrays still can update session progress.
+      try {
+        console.log('No explicit sessions source found — attempting to generate sessions from appointment/service data');
+        const service = trainerData.services.find((svc) => appointment.serviceId && svc._id.toString && svc._id.toString() === (appointment.serviceId && appointment.serviceId.toString ? appointment.serviceId.toString() : appointment.serviceId));
+
+        const generated = generateSessions({
+          tier: appointment.tier || service?.tier || 'custom',
+          startDate: appointment.appointmentTime || appointment.startDate || new Date(),
+          timeOfDay: appointment.timeOfDay || appointment.dailyVisitTime || service?.sessionTime || undefined,
+          customDuration: appointment.duration || service?.duration || 7,
+          frequency: service?.frequency || appointment.trainingPlan?.frequency || 'daily',
+          daysPerWeek: service?.daysPerWeek || appointment.trainingPlan?.daysPerWeek,
+        });
+
+        // generated is an array of Date objects
+        sessionsArray = generated.map((d) => ({ date: d, status: 'pending', progressNotes: '' }));
+
+        // also populate appointment.sessionDates so persistence code can update it
+        appointment.sessionDates = generated;
+
+        console.log(`Generated sessionsArray with length=${sessionsArray.length}`);
+      } catch (genErr) {
+        console.warn('Failed to generate fallback sessions:', genErr && genErr.message ? genErr.message : genErr);
+      }
     }
 
     console.log('Built sessionsArray length=', sessionsArray ? sessionsArray.length : 0, 'idx=', idx, 'sessionsArray sample=', sessionsArray && sessionsArray.slice ? sessionsArray.slice(0,5) : sessionsArray);
