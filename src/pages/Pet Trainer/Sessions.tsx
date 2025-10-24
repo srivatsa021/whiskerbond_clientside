@@ -46,10 +46,20 @@ const Sessions = () => {
   const updateSession = async (apt: any, idx: number, status: "pending" | "completed" | "missed", progressNotes: string = "") => {
     try {
       const updated = await trainerBookingsApi.updateSessionStatus(apt.appointmentId, idx, status, progressNotes);
+      console.log('Updated appointment data:', JSON.stringify(updated, null, 2));
+      
+      // Update the selected appointment with the fresh data
       setSelectedAppointment(updated);
       setEditingSessionIndex(null);
       setSessionProgressNotes("");
+      
+      // Also refresh the appointments list to keep everything in sync
       await refresh();
+      
+      // Force a re-render by updating the selected appointment again
+      setTimeout(() => {
+        setSelectedAppointment(updated);
+      }, 100);
     } catch (err) {
       console.error("Error updating session:", err);
       alert("Failed to update session. Please try again.");
@@ -193,7 +203,28 @@ const Sessions = () => {
                       </div>
                       {apt.dayWiseStatus?.length ? (
                         <div className="text-xs text-gray-700 mt-1">
-                          Day {countCompleted(apt)} of {apt.dayWiseStatus.length} completed
+                          <div>Day {countCompleted(apt)} of {apt.dayWiseStatus.length} completed</div>
+                          {(() => {
+                            const first = apt.dayWiseStatus[0];
+                            const firstTime = first && first.date ? new Date(first.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : (apt.dailyVisitTime || apt.trainingPlan?.sessionTime || (apt.appointmentTime ? new Date(apt.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''));
+                            return (
+                              <div className="mt-1 bg-gray-50 p-2 rounded">
+                                <div className="font-medium text-sm">Day 1 — {firstTime}</div>
+                                <div className="text-xs text-gray-600 mt-1">
+                                  {first && first.status === "completed" ? (
+                                    <span className="inline-block px-2 py-1 bg-green-100 text-green-800 rounded">✓ Completed</span>
+                                  ) : first && first.status === "missed" ? (
+                                    <span className="inline-block px-2 py-1 bg-red-100 text-red-800 rounded">Missed</span>
+                                  ) : (
+                                    <span className="inline-block px-2 py-1 bg-gray-100 text-gray-800 rounded">Pending</span>
+                                  )}
+                                </div>
+                                {first && first.progressNotes ? (
+                                  <div className="text-xs text-gray-700 mt-2">Notes: {first.progressNotes}</div>
+                                ) : null}
+                              </div>
+                            );
+                          })()}
                         </div>
                       ) : null}
                     </div>
@@ -261,8 +292,27 @@ const Sessions = () => {
                                 <div>
                                   <h4 className="font-semibold text-sm mb-2">Training Sessions</h4>
                                   <div className="space-y-3">
-                                    {((selectedAppointment.trainingPlan?.sessionDates && selectedAppointment.trainingPlan.sessionDates.length > 0) ? selectedAppointment.trainingPlan.sessionDates : ((selectedAppointment.sessionDates && selectedAppointment.sessionDates.length > 0) ? selectedAppointment.sessionDates : selectedAppointment.dayWiseStatus)).map((s: any, i: number) => {
-                                      const isLastDay = i === ((selectedAppointment.trainingPlan?.sessionDates && selectedAppointment.trainingPlan.sessionDates.length > 0 ? selectedAppointment.trainingPlan.sessionDates : selectedAppointment.dayWiseStatus).length - 1);
+                                    {(() => {
+                                      // Prioritize dayWiseStatus since that's what the backend updates
+                                      const sessionsData = selectedAppointment.dayWiseStatus && selectedAppointment.dayWiseStatus.length > 0 
+                                        ? selectedAppointment.dayWiseStatus 
+                                        : (selectedAppointment.trainingPlan?.sessionDates && selectedAppointment.trainingPlan.sessionDates.length > 0) 
+                                          ? selectedAppointment.trainingPlan.sessionDates 
+                                          : (selectedAppointment.sessionDates && selectedAppointment.sessionDates.length > 0) 
+                                            ? selectedAppointment.sessionDates 
+                                            : [];
+                                      console.log('Sessions data being rendered:', JSON.stringify(sessionsData, null, 2));
+                                      console.log('selectedAppointment.dayWiseStatus:', JSON.stringify(selectedAppointment.dayWiseStatus, null, 2));
+                                      return sessionsData;
+                                    })().map((s: any, i: number) => {
+                                      const sessionsData = selectedAppointment.dayWiseStatus && selectedAppointment.dayWiseStatus.length > 0 
+                                        ? selectedAppointment.dayWiseStatus 
+                                        : (selectedAppointment.trainingPlan?.sessionDates && selectedAppointment.trainingPlan.sessionDates.length > 0) 
+                                          ? selectedAppointment.trainingPlan.sessionDates 
+                                          : (selectedAppointment.sessionDates && selectedAppointment.sessionDates.length > 0) 
+                                            ? selectedAppointment.sessionDates 
+                                            : [];
+                                      const isLastDay = i === (sessionsData.length - 1);
                                       const isEditing = editingSessionIndex === i;
                                       return (
                                         <div key={i} className="border rounded p-3 space-y-2">
@@ -271,10 +321,19 @@ const Sessions = () => {
                                               <div className="font-medium text-sm">
                                                 Day {i + 1} — {(s.dateTime ? new Date(s.dateTime).toLocaleDateString() : (s.date ? (typeof s.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s.date) ? (() => { const [yy, mm, dd] = s.date.split("-"); return `${mm}/${dd}/${yy}`; })() : new Date(s.date).toLocaleDateString()) : ''))} {s.time || selectedAppointment.trainingPlan?.sessionTime || selectedAppointment.dailyVisitTime || ''}
                                               </div>
-                                              <div className="text-xs text-gray-600 mt-1">
-                                                {s.status === "completed" && <span className="inline-block px-2 py-1 bg-green-100 text-green-800 rounded">✓ Completed</span>}
-                                                {s.status === "pending" && <span className="inline-block px-2 py-1 bg-gray-100 text-gray-800 rounded">Pending</span>}
-                                                {s.status === "missed" && <span className="inline-block px-2 py-1 bg-red-100 text-red-800 rounded">Missed</span>}
+                                              <div className="mt-1">
+                                                <div className="text-xs font-medium text-gray-700">Status</div>
+                                                <div className="text-xs text-gray-600 mt-0.5">
+                                                  {s.status === "completed" && (
+                                                    <span className="inline-block px-2 py-1 bg-green-100 text-green-800 rounded">✓ Completed</span>
+                                                  )}
+                                                  {s.status === "pending" && (
+                                                    <span className="inline-block px-2 py-1 bg-gray-100 text-gray-800 rounded">Pending</span>
+                                                  )}
+                                                  {s.status === "missed" && (
+                                                    <span className="inline-block px-2 py-1 bg-red-100 text-red-800 rounded">Missed</span>
+                                                  )}
+                                                </div>
                                               </div>
                                             </div>
                                             <div>
@@ -294,9 +353,10 @@ const Sessions = () => {
                                             </div>
                                           </div>
 
-                                          {(s.progressNotes || (s as any).notes) && !isEditing && (
-                                            <div className="text-xs text-gray-700 bg-blue-50 p-2 rounded">
-                                              <strong>Notes:</strong> {s.progressNotes || (s as any).notes}
+                                          {!isEditing && (
+                                            <div className="mt-2">
+                                              <div className="text-xs font-medium text-gray-700">Notes</div>
+                                              <div className="text-xs text-gray-700 whitespace-pre-wrap">{s.progressNotes || (s as any).notes || ""}</div>
                                             </div>
                                           )}
 

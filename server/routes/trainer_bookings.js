@@ -555,24 +555,15 @@ router.patch("/:appointmentId/sessions/:index", authMiddleware, async (req, res)
     else if (anyCompleted) appointment.status = "in_progress";
     else appointment.status = "pending";
 
-    // Prepare safe values for persistence: convert any date-like entries to real Dates
-    const persistedDayWise = (appointment.trainingPlan && Array.isArray(appointment.trainingPlan.sessionDates) && appointment.trainingPlan.sessionDates.length > 0)
-      ? appointment.trainingPlan.sessionDates.map((sd) => ({
-          date: sd.dateTime ? new Date(sd.dateTime) : (sd.date ? new Date(sd.date) : new Date()),
-          status: sd.status || "pending",
-          progressNotes: sd.progressNotes || "",
-        }))
-      : (Array.isArray(appointment.sessionDates) && appointment.sessionDates.length > 0)
-      ? appointment.sessionDates.map((sd) => ({
-          date: sd && sd.dateTime ? new Date(sd.dateTime) : (sd && sd.date ? new Date(sd.date) : (typeof sd === 'string' || sd instanceof Date ? new Date(sd) : new Date())),
-          status: sd && sd.status ? sd.status : "pending",
-          progressNotes: sd && sd.progressNotes ? sd.progressNotes : "",
-        }))
-      : (appointment.dayWiseStatus || []).map((s) => ({
-          date: s.date ? new Date(s.date) : new Date(),
-          status: s.status || "pending",
-          progressNotes: s.progressNotes || "",
-        }));
+    // Prepare safe values for persistence: use the updated sessionsArray
+    const persistedDayWise = sessionsArray.map((s) => ({
+      date: s.date ? new Date(s.date) : new Date(),
+      status: s.status || "pending",
+      progressNotes: s.progressNotes || "",
+    }));
+
+    console.log('persistedDayWise after update:', JSON.stringify(persistedDayWise, null, 2));
+    console.log('sessionsArray after update:', JSON.stringify(sessionsArray, null, 2));
 
     // Ensure appointmentId is an ObjectId for matching
     let apptId;
@@ -635,9 +626,11 @@ router.patch("/:appointmentId/sessions/:index", authMiddleware, async (req, res)
           status: sd && sd.status ? sd.status : "pending",
           progressNotes: sd && sd.progressNotes ? sd.progressNotes : "",
         }));
+        console.log('Updating dayWiseStatus with:', JSON.stringify(updateObj[`appointments.${aptIndex}.dayWiseStatus`], null, 2));
       }
 
       updateObj.updatedAt = new Date();
+      console.log('Final updateObj:', JSON.stringify(updateObj, null, 2));
       await Trainer.updateOne(
         { _id: trainerData._id },
         { $set: updateObj },

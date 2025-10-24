@@ -198,7 +198,21 @@ router.post("/login", async (req, res) => {
 
     const user = matchingUsers[0];
 
-    const isPasswordValid = await user.comparePassword(password);
+    // Defensive checks: ensure password field & comparePassword exist
+    if (!user || !user.password || typeof user.comparePassword !== 'function') {
+      console.warn('Login attempt for user missing password or comparePassword method', { email });
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    let isPasswordValid = false;
+    try {
+      isPasswordValid = await user.comparePassword(password);
+    } catch (cmpErr) {
+      console.error('Error while comparing password for user', user._id?.toString ? user._id.toString() : user._id, cmpErr);
+      // Treat as invalid credentials rather than internal server error to avoid leaking implementation details
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
     if (!isPasswordValid) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
