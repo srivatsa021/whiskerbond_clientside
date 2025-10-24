@@ -625,16 +625,16 @@ router.patch("/:appointmentId/sessions/:index", authMiddleware, async (req, res)
           updateObj[`appointments.${aptIndex}.trainingPlan.sessionDates`] = newSessionDates;
         }
       } else {
-        // No linked trainingPlans entry - update the appointment.sessionDates array in-place
-        const newAptSessionDates = persistedDayWise.map((sd, i) => ({
-          day: sd && sd.day !== undefined ? sd.day : i + 1,
-          date: sd && sd.date ? new Date(sd.date).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
-          time: appointment.trainingPlan?.sessionTime || appointment.dailyVisitTime || "",
-          dateTime: sd && sd.date ? new Date(sd.date).toISOString() : new Date().toISOString(),
+        // No linked trainingPlans entry - persist sessionDates as an array of Dates
+        // and keep rich per-day metadata in dayWiseStatus (which is a proper schema field)
+        const newAptSessionDates = persistedDayWise.map((sd) => (sd && sd.date ? new Date(sd.date) : new Date()));
+        updateObj[`appointments.${aptIndex}.sessionDates`] = newAptSessionDates;
+        // Persist dayWiseStatus explicitly so progressNotes/status are stored in a typed subdoc
+        updateObj[`appointments.${aptIndex}.dayWiseStatus`] = persistedDayWise.map((sd) => ({
+          date: sd && sd.date ? new Date(sd.date) : new Date(),
           status: sd && sd.status ? sd.status : "pending",
           progressNotes: sd && sd.progressNotes ? sd.progressNotes : "",
         }));
-        updateObj[`appointments.${aptIndex}.sessionDates`] = newAptSessionDates;
       }
 
       updateObj.updatedAt = new Date();
