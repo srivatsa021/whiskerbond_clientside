@@ -1,4 +1,5 @@
 import express from "express";
+import mongoose from "mongoose";
 import Trainer from "../models/Trainer.js";
 import { authenticateToken } from "../middleware/auth.js";
 
@@ -144,20 +145,117 @@ router.put("/:serviceId", authenticateToken, async (req, res) => {
 router.delete("/:serviceId", authenticateToken, async (req, res) => {
   try {
     const { serviceId } = req.params;
+    console.log("🗑️ DELETE request received for serviceId:", serviceId);
+    console.log("👤 User ID:", req.userId);
 
-    const trainer = await getOrCreateTrainer(req.userId);
-    const service = trainer.services.id(serviceId);
-    if (!service) {
+    // Validate if serviceId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(serviceId)) {
+      console.log("❌ Invalid serviceId format");
+      return res.status(400).json({ message: "Invalid service ID format" });
+    }
+
+    // Use MongoDB aggregation to check appointments without triggering Mongoose validation
+    const result = await Trainer.aggregate([
+      { $match: { userId: new mongoose.Types.ObjectId(req.userId) } },
+      {
+        $project: {
+          services: 1,
+          hasService: {
+            $in: [new mongoose.Types.ObjectId(serviceId), "$services._id"]
+          },
+          appointmentCount: {
+            $size: {
+              $filter: {
+                input: "$appointments",
+                as: "apt",
+                cond: {
+                  $eq: [
+                    { $toString: "$$apt.serviceId" },
+                    serviceId
+                  ]
+                }
+              }
+            }
+          },
+          activeAppointmentCount: {
+            $size: {
+              $filter: {
+                input: "$appointments",
+                as: "apt",
+                cond: {
+                  $and: [
+                    { $eq: [{ $toString: "$$apt.serviceId" }, serviceId] },
+                    {
+                      $in: ["$$apt.status", ["pending", "in_progress"]]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    ]);
+
+    if (!result || result.length === 0) {
+      return res.status(404).json({ message: "Trainer profile not found" });
+    }
+
+    const data = result[0];
+
+    // Check if service exists
+    if (!data.hasService) {
       return res.status(404).json({ message: "Service not found" });
     }
 
-    trainer.services.pull(serviceId);
-    await trainer.save();
+    // Check for appointments
+    if (data.activeAppointmentCount > 0) {
+      return res.status(400).json({ 
+        message: `Cannot delete service. ${data.activeAppointmentCount} active appointment(s) in progress or pending. Please complete or cancel them first.` 
+      });
+    }
 
+    if (data.appointmentCount > 0) {
+      return res.status(400).json({ 
+        message: "Cannot delete service. It has associated appointments. Please archive it instead." 
+      });
+    }
+
+    // Safe to delete - use updateOne with $pull to avoid loading the document
+    const userIdObj = mongoose.Types.ObjectId.isValid(req.userId) 
+      ? new mongoose.Types.ObjectId(req.userId)
+      : req.userId;
+    
+    const serviceIdObj = new mongoose.Types.ObjectId(serviceId);
+    
+    console.log("🔍 Attempting to delete with userId:", userIdObj, "serviceId:", serviceIdObj);
+    
+    const deleteResult = await Trainer.updateOne(
+      { userId: userIdObj },
+      { $pull: { services: { _id: serviceIdObj } } }
+    );
+
+    console.log("✅ Delete result:", {
+      acknowledged: deleteResult.acknowledged,
+      matchedCount: deleteResult.matchedCount,
+      modifiedCount: deleteResult.modifiedCount
+    });
+
+    if (deleteResult.matchedCount === 0) {
+      console.log("❌ No trainer found with userId:", userIdObj);
+      return res.status(404).json({ message: "Trainer not found" });
+    }
+
+    if (deleteResult.modifiedCount === 0) {
+      console.log("⚠️ Service not deleted - might already be deleted or not found");
+      return res.status(404).json({ message: "Service not found or already deleted" });
+    }
+
+    console.log("🎉 Service deleted successfully from database");
     res.json({ message: "Service deleted successfully" });
   } catch (error) {
     console.error("Delete trainer service error:", error);
-    res.status(500).json({ message: "Server error deleting trainer service" });
+    res.status(500).json({ message: error.message || "Server error deleting trainer service" });
   }
 });
 

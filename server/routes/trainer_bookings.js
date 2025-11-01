@@ -44,8 +44,9 @@ const normalizeAppointmentOutput = (apt) => {
   if (Array.isArray(out.sessionDates)) {
     out.sessionDates = out.sessionDates.map((d) => (d ? new Date(d).toISOString() : d));
   }
-  // normalize dayWiseStatus dates
-  if (Array.isArray(out.dayWiseStatus)) {
+  // normalize dayWiseStatus dates (preserve the actual data if exists)
+  const hasDayWiseStatus = Array.isArray(out.dayWiseStatus) && out.dayWiseStatus.length > 0;
+  if (hasDayWiseStatus) {
     out.dayWiseStatus = out.dayWiseStatus.map((s) => ({
       ...s,
       date: s.date ? new Date(s.date).toISOString() : s.date,
@@ -53,7 +54,8 @@ const normalizeAppointmentOutput = (apt) => {
       status: s.status || "pending",
     }));
   }
-  // normalize trainingPlan.sessionDates if present and expose as dayWiseStatus (response-only)
+  
+  // normalize trainingPlan.sessionDates if present
   if (out.trainingPlan && Array.isArray(out.trainingPlan.sessionDates)) {
     out.trainingPlan.sessionDates = out.trainingPlan.sessionDates.map((sd) => ({
       day: sd.day,
@@ -64,12 +66,15 @@ const normalizeAppointmentOutput = (apt) => {
       progressNotes: sd.progressNotes || "",
     }));
 
-    // Expose a response-only dayWiseStatus array derived from the trainingPlan.sessionDates so UI can render
-    out.dayWiseStatus = out.trainingPlan.sessionDates.map((sd) => ({
-      date: sd.dateTime ? new Date(sd.dateTime).toISOString() : (sd.date ? new Date(sd.date).toISOString() : sd.date),
-      status: sd.status || "pending",
-      progressNotes: sd.progressNotes || "",
-    }));
+    // Only derive dayWiseStatus from trainingPlan.sessionDates if dayWiseStatus doesn't already exist with data
+    // This ensures that directly updated dayWiseStatus values are preserved and prioritized
+    if (!hasDayWiseStatus) {
+      out.dayWiseStatus = out.trainingPlan.sessionDates.map((sd) => ({
+        date: sd.dateTime ? new Date(sd.dateTime).toISOString() : (sd.date ? new Date(sd.date).toISOString() : sd.date),
+        status: sd.status || "pending",
+        progressNotes: sd.progressNotes || "",
+      }));
+    }
   }
 
   // ensure petName/clientName are populated from legacy fields
